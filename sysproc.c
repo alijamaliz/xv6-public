@@ -6,6 +6,7 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
+#include "counts.h"
 
 int
 sys_fork(void)
@@ -88,4 +89,13 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+int sys_counts(void)
+{
+  struct countsTable *counts_table;
+  if (argptr(0, (void *)&counts_table, sizeof(struct countsTable*)) < 0)
+    return -1;
+
+  return getCounts(counts_table);
 }

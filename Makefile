@@ -26,6 +26,7 @@ OBJS = \
 	trap.o\
 	uart.o\
 	vectors.o\
+	counts.o\
 	vm.o\
 
 # Cross-compiling (e.g., on Mac OS X)
@@ -174,6 +175,7 @@ UPROGS=\
 	_usertests\
 	_wc\
 	_zombie\
+	_countsTest\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
@@ -243,7 +245,7 @@ qemu-nox-gdb: fs.img xv6.img .gdbinit
 EXTRA=\
 	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
 	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c\
-	printf.c umalloc.c\
+	printf.c umalloc.c countsTest.c\
 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
 	.gdbinit.tmpl gdbutil\
 

@@ -9,12 +9,16 @@ struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
+struct countsTable;
 
 // bio.c
 void            binit(void);
 struct buf*     bread(uint, uint);
 void            brelse(struct buf*);
 void            bwrite(struct buf*);
+
+int increament(int index);
+int getCounts(struct countsTable *table);
 
 // console.c
 void            consoleinit(void);
