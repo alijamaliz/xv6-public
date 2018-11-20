@@ -7,6 +7,9 @@
 #include "x86.h"
 #include "syscall.h"
 #include "counts.h"
+#include "spinlock.h"
+
+struct spinlock lock;
 
 // User code makes a system call with INT T_SYSCALL.
 // System call number in %eax.
@@ -139,7 +142,9 @@ syscall(void)
 
   num = curproc->tf->eax;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
+    acquire(&lock);
     increament(num);
+    release(&lock);
     curproc->tf->eax = syscalls[num]();
   } else {
     cprintf("%d %s: unknown sys call %d\n",
