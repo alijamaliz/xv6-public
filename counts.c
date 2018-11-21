@@ -4,7 +4,7 @@ struct countsTable counts_table;
 
 int increament(int index)
 {
-    counts_table.counts[index]++;
+    counts_table.counts[index - 1]++;
     return 0;
 }
 
