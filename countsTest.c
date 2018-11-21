@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     printf(1, "|  Link :   %d  |\n", table->counts[18]);
     printf(1, "|  Mkdir :  %d  |\n", table->counts[19]);
     printf(1, "|  Close :  %d  |\n", table->counts[20]);
-    printf(1, "|  Counts : %d  |\n", table->counts[11]);
+    printf(1, "|  Counts : %d  |\n", table->counts[21]);
     printf(1, "----------------\n");
     exit();
 }
