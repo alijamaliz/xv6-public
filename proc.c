@@ -88,6 +88,7 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  p->start_time = ticks;
 
   release(&ptable.lock);
 
@@ -230,6 +231,7 @@ exit(void)
   struct proc *curproc = myproc();
   struct proc *p;
   int fd;
+  p->finish_time = ticks;
 
   if(curproc == initproc)
     panic("init exiting");
