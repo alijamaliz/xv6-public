@@ -82,9 +82,6 @@ void cpuIntensiveTask()
     }
 }
 
-int sum_of_turnaround_times = 0;
-int sum_of_runtimes = 0;
-
 int main(int argc, char *argv[])
 {
     for (int i = 0; i < NUM_OF_PROCESSES; i++)
@@ -103,9 +100,7 @@ int main(int argc, char *argv[])
                 writetest();
                 struct timesContainer *timesContainer = malloc(sizeof(struct timesContainer));
                 times(pid, timesContainer);
-                sum_of_turnaround_times += (timesContainer->finish_time - timesContainer->start_time);
-                sum_of_runtimes += timesContainer->run_time;
-                printf(stdout, "IO %d: start: %d, finish: %d, run: %d, res: %d\n", pid, timesContainer->start_time, timesContainer->finish_time, timesContainer->run_time, timesContainer->response_time);
+                printf(stdout, "IO %d: start: %d, finish: %d, response time: %d\n", pid, timesContainer->start_time, timesContainer->finish_time, timesContainer->response_time);
                 exit();
             }
             else
@@ -114,9 +109,7 @@ int main(int argc, char *argv[])
                 cpuIntensiveTask();
                 struct timesContainer *timesContainer = malloc(sizeof(struct timesContainer));
                 times(pid, timesContainer);
-                sum_of_turnaround_times += (timesContainer->finish_time - timesContainer->start_time);
-                sum_of_runtimes += timesContainer->run_time;
-                printf(stdout, "CPU %d: start: %d, finish: %d, run: %d, res: %d\n", pid, timesContainer->start_time, timesContainer->finish_time, timesContainer->run_time, timesContainer->response_time);
+                printf(stdout, "CPU %d: start: %d, finish: %d, response time: %d\n", pid, timesContainer->start_time, timesContainer->finish_time, timesContainer->response_time);
                 exit();
             }
         }
@@ -125,9 +118,5 @@ int main(int argc, char *argv[])
     {
         wait();
     }
-    printf(stdout, "turn: %d, run: %d\n", sum_of_turnaround_times, sum_of_runtimes);
-    printf(stdout, "Number of jobs: %d\n", NUM_OF_PROCESSES);
-    printf(stdout, "Tournaround time average: %d\n", sum_of_turnaround_times / NUM_OF_PROCESSES);
-    printf(stdout, "Runtime time average: %d\n", sum_of_runtimes / NUM_OF_PROCESSES);
     exit();
 }

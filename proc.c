@@ -91,6 +91,7 @@ found:
   p->state = EMBRYO;
   p->pid = nextpid++;
   setStartTime(p->pid, ticks);
+  p->last_schedule_time = ticks;
 
   p->priority = -1;
   release(&ptable.lock);
@@ -417,7 +418,6 @@ scheduler(void)
         continue;
         
         increamentResponseTime(p->pid, ticks - p->last_schedule_time);
-        p->last_schedule_time = ticks;
 
         if(p->priority<NUM_PRIORITY-1){
           p->priority++;
@@ -435,8 +435,8 @@ scheduler(void)
         swtch(&(c->scheduler), p->context);
         switchkvm();
 
+        p->last_schedule_time = ticks;
         setFinishTime(p->pid, ticks);
-        increamentRunTime(p->pid, ticks - p->last_schedule_time);
 
         // Process is done running for now.
         // It should have changed its p->state before coming back.
