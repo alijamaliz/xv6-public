@@ -7,8 +7,8 @@
 #include "proc.h"
 #include "spinlock.h"
 #include "times.h"
-#define NUM_PRIORITY 3
-
+#define NUM_PRIORITY 10
+#define Boost_TIME 20    //boost time (ms)
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
@@ -382,7 +382,15 @@ int get_min()
     }
   return min_priority;
 }
-
+void set_priorities_to_zero()
+{
+  struct proc *tmp;
+  for (tmp = ptable.proc; tmp < &ptable.proc[NPROC]; tmp++){
+    if (tmp->state != RUNNABLE)
+        continue;
+    tmp->priority=0;
+  }
+}
 void
 scheduler(void)
 {
@@ -390,7 +398,6 @@ scheduler(void)
   struct cpu *c = mycpu();
   c->proc = 0;
   int min=0 ;
-
   for(;;){
     // Enable interrupts on this processor.
     sti();
@@ -398,6 +405,11 @@ scheduler(void)
     acquire(&ptable.lock);
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     {
+      if (ticks % Boost_TIME == 0 && ticks!=0)
+      {
+        // cprintf("salma %d\n",ticks);
+        set_priorities_to_zero();
+      }
       min = get_min();
       if (p->state != RUNNABLE)
         continue;
@@ -409,8 +421,9 @@ scheduler(void)
 
         if(p->priority<NUM_PRIORITY-1){
           p->priority++;
-          cprintf("priority: %d \n", p->priority);
+          // cprintf("priority: %d \n", p->priority);
         }
+
 
         // Switch to chosen process.  It is the process's job
         // to release ptable.lock and then reacquire it
