@@ -27,6 +27,7 @@ OBJS = \
 	uart.o\
 	vectors.o\
 	counts.o\
+	times.o\
 	vm.o\
 
 # Cross-compiling (e.g., on Mac OS X)

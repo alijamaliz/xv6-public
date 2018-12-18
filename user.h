@@ -1,6 +1,7 @@
 struct stat;
 struct rtcdate;
 struct countsTable;
+struct timesContainer;
 
 // system calls
 int fork(void);
@@ -25,6 +26,7 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int counts(struct countsTable*);
+int times(int, struct timesContainer*);
 
 // ulib.c
 int stat(char*, struct stat*);

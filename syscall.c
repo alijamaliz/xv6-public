@@ -7,6 +7,7 @@
 #include "x86.h"
 #include "syscall.h"
 #include "counts.h"
+#include "times.h"
 #include "spinlock.h"
 
 struct spinlock lock;
@@ -108,6 +109,7 @@ extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
 extern int sys_counts(void);
+extern int sys_times(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -131,7 +133,8 @@ static int (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
-[SYS_counts]  sys_counts
+[SYS_counts]  sys_counts,
+[SYS_times]   sys_times
 };
 
 void

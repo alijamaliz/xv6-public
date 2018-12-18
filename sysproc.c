@@ -7,6 +7,7 @@
 #include "mmu.h"
 #include "proc.h"
 #include "counts.h"
+#include "times.h"
 
 int
 sys_fork(void)
@@ -98,4 +99,17 @@ int sys_counts(void)
     return -1;
 
   return getCounts(counts_table);
+}
+
+int sys_times(void)
+{
+  struct timesContainer *timesContainer;
+  int proc_id;
+
+  if (argint(0, &proc_id) < 0)
+    return -1;
+  if (argptr(1, (void *)&timesContainer, sizeof(struct timesContainer *)) < 0)
+    return -1;
+
+  return getTimesOfSpecificProcess(proc_id, timesContainer);
 }

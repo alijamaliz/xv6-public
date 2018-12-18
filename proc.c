@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "times.h"
 
 struct {
   struct spinlock lock;
@@ -88,7 +89,7 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
-  p->start_time = ticks;
+  setStartTime(p->pid, ticks);
 
   release(&ptable.lock);
 
@@ -231,7 +232,6 @@ exit(void)
   struct proc *curproc = myproc();
   struct proc *p;
   int fd;
-  p->finish_time = ticks;
 
   if(curproc == initproc)
     panic("init exiting");
@@ -338,6 +338,9 @@ scheduler(void)
       if(p->state != RUNNABLE)
         continue;
 
+      increamentResponseTime(p->pid, ticks - p->last_schedule_time);
+      p->last_schedule_time = ticks;
+
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
@@ -347,6 +350,9 @@ scheduler(void)
 
       swtch(&(c->scheduler), p->context);
       switchkvm();
+
+      setFinishTime(p->pid, ticks);
+      increamentRunTime(p->pid, ticks - p->last_schedule_time);
 
       // Process is done running for now.
       // It should have changed its p->state before coming back.
