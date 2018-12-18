@@ -7,6 +7,7 @@
 #include "proc.h"
 #include "spinlock.h"
 #include "times.h"
+#define NUM_PRIORITY 3
 
 struct {
   struct spinlock lock;
@@ -91,6 +92,7 @@ found:
   p->pid = nextpid++;
   setStartTime(p->pid, ticks);
 
+  p->priority = -1;
   release(&ptable.lock);
 
   // Allocate kernel stack.
@@ -320,43 +322,113 @@ wait(void)
 //  - choose a process to run
 //  - swtch to start running that process
 //  - eventually that process transfers control
-//      via swtch back to the scheduler.
+//      via swtch back to the scheduler
+
+//default scheduler
+// void
+// scheduler(void)
+// {
+//   struct proc *p;
+//   struct cpu *c = mycpu();
+//   c->proc = 0;
+  
+//   for(;;){
+//     // Enable interrupts on this processor.
+//     sti();
+
+//     // Loop over process table looking for process to run.
+//     acquire(&ptable.lock);
+//     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+//       if(p->state != RUNNABLE)
+//         continue;
+
+//       increamentResponseTime(p->pid, ticks - p->last_schedule_time);
+//       p->last_schedule_time = ticks;
+
+//       // Switch to chosen process.  It is the process's job
+//       // to release ptable.lock and then reacquire it
+//       // before jumping back to us.
+//       c->proc = p;
+//       switchuvm(p);
+//       p->state = RUNNING;
+
+//       swtch(&(c->scheduler), p->context);
+//       switchkvm();
+
+//       setFinishTime(p->pid, ticks);
+//       increamentRunTime(p->pid, ticks - p->last_schedule_time);
+
+//       // Process is done running for now.
+//       // It should have changed its p->state before coming back.
+//       c->proc = 0;
+//     }
+//     release(&ptable.lock);
+
+//   }
+// }
+
+//mlfq scheduler
+
+int get_min()
+{
+  int min_priority = NUM_PRIORITY - 1;
+  struct proc *ptemp;
+  for (ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++)
+    if (ptemp->priority < min_priority)
+    {
+      if (ptemp->state != RUNNABLE)
+        continue;
+      min_priority = ptemp->priority;
+    }
+  return min_priority;
+}
+
 void
 scheduler(void)
 {
   struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
-  
+  int min=0 ;
+
   for(;;){
     // Enable interrupts on this processor.
     sti();
-
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+    {
+      min = get_min();
+      if (p->state != RUNNABLE)
         continue;
+      if (p->priority != min)
+        continue;
+        
+        increamentResponseTime(p->pid, ticks - p->last_schedule_time);
+        p->last_schedule_time = ticks;
 
-      increamentResponseTime(p->pid, ticks - p->last_schedule_time);
-      p->last_schedule_time = ticks;
+        if(p->priority<NUM_PRIORITY-1){
+          p->priority++;
+          cprintf("priority: %d \n", p->priority);
+        }
 
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
-      c->proc = p;
-      switchuvm(p);
-      p->state = RUNNING;
+        // Switch to chosen process.  It is the process's job
+        // to release ptable.lock and then reacquire it
+        // before jumping back to us.
+        c->proc = p;
+        switchuvm(p);
+        p->state = RUNNING;
 
-      swtch(&(c->scheduler), p->context);
-      switchkvm();
+        swtch(&(c->scheduler), p->context);
+        switchkvm();
 
-      setFinishTime(p->pid, ticks);
-      increamentRunTime(p->pid, ticks - p->last_schedule_time);
+        setFinishTime(p->pid, ticks);
+        increamentRunTime(p->pid, ticks - p->last_schedule_time);
 
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
-      c->proc = 0;
+        // Process is done running for now.
+        // It should have changed its p->state before coming back.
+        c->proc = 0;
+      
     }
     release(&ptable.lock);
 
