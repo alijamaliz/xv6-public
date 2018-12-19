@@ -72,12 +72,17 @@ void writetest(void)
 
 void cpuIntensiveTask()
 {
-    int k = 0;
-    for (int i = 0; i < 10000; i++)
+    long temp = 0;
+    for (int k = 0; k < 1000000; k++)
     {
-        for (int j = 0; j < 10000; j++)
+        for (int i = 0; i < 1000000; i++)
         {
-            k = k + (i * j);
+            for (int j = 0; j < 1000000; j++)
+            {
+                temp = temp + (i * j);
+                temp = temp + (i * j);
+            }
+            temp = 0;
         }
     }
 }
