@@ -416,31 +416,33 @@ scheduler(void)
         continue;
       if (p->priority != min)
         continue;
-        
-        increamentResponseTime(p->pid, ticks - p->last_schedule_time);
 
-        if(p->priority<NUM_PRIORITY-1){
-          p->priority++;
-          // cprintf("priority: %d \n", p->priority);
-        }
+      increamentResponseTime(p->pid, ticks - p->last_schedule_time);
 
+      if (p->priority < NUM_PRIORITY - 1)
+      {
+        p->priority++;
+        // cprintf("priority: %d \n", p->priority);
+      }
 
-        // Switch to chosen process.  It is the process's job
-        // to release ptable.lock and then reacquire it
-        // before jumping back to us.
-        c->proc = p;
-        switchuvm(p);
-        p->state = RUNNING;
+      setFinishTime(p->pid, ticks);
 
-        swtch(&(c->scheduler), p->context);
-        switchkvm();
+      // Switch to chosen process.  It is the process's job
+      // to release ptable.lock and then reacquire it
+      // before jumping back to us.
+      c->proc = p;
+      switchuvm(p);
+      p->state = RUNNING;
 
-        p->last_schedule_time = ticks;
-        setFinishTime(p->pid, ticks);
+      swtch(&(c->scheduler), p->context);
+      switchkvm();
 
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
-        c->proc = 0;
+      p->last_schedule_time = ticks;
+      setFinishTime(p->pid, ticks);
+
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      c->proc = 0;
       
     }
     release(&ptable.lock);
