@@ -9,65 +9,36 @@
 int stdout = 1;
 char buf[8192];
 
-void writetest(void)
+void bigwrite(void)
 {
-    int fd;
-    int i;
+    int fd, sz;
 
-    // printf(stdout, "small file test\n");
-    fd = open("small", O_CREATE | O_RDWR);
-    if (fd >= 0)
+    // printf(1, "bigwrite test\n");
+
+    unlink("bigwrite");
+    for (sz = 499; sz < 12 * 512; sz += 471)
     {
-        // printf(stdout, "creat small succeeded; ok\n");
-    }
-    else
-    {
-        // printf(stdout, "error: creat small failed!\n");
-        exit();
-    }
-    for (i = 0; i < 100; i++)
-    {
-        if (write(fd, "aaaaaaaaaa", 10) != 10)
+        fd = open("bigwrite", O_CREATE | O_RDWR);
+        if (fd < 0)
         {
-            // printf(stdout, "error: write aa %d new file failed\n", i);
+            // printf(1, "cannot create bigwrite\n");
             exit();
         }
-        if (write(fd, "bbbbbbbbbb", 10) != 10)
+        int i;
+        for (i = 0; i < 2; i++)
         {
-            // printf(stdout, "error: write bb %d new file failed\n", i);
-            exit();
+            int cc = write(fd, buf, sz);
+            if (cc != sz)
+            {
+                // printf(1, "write(%d) ret %d\n", sz, cc);
+                exit();
+            }
         }
+        close(fd);
+        unlink("bigwrite");
     }
-    // printf(stdout, "writes ok\n");
-    close(fd);
-    fd = open("small", O_RDONLY);
-    if (fd >= 0)
-    {
-        // printf(stdout, "open small succeeded ok\n");
-    }
-    else
-    {
-        // printf(stdout, "error: open small failed!\n");
-        exit();
-    }
-    i = read(fd, buf, 2000);
-    if (i == 2000)
-    {
-        // printf(stdout, "read succeeded ok\n");
-    }
-    else
-    {
-        // printf(stdout, "read failed\n");
-        exit();
-    }
-    close(fd);
 
-    if (unlink("small") < 0)
-    {
-        // printf(stdout, "unlink small failed\n");
-        exit();
-    }
-    // printf(stdout, "small file test ok\n");
+    // printf(1, "bigwrite ok\n");
 }
 
 void cpuIntensiveTask()
@@ -102,7 +73,7 @@ int main(int argc, char *argv[])
             if (i % 2 == 0)
             {
                 int pid = getpid();
-                writetest();
+                bigwrite();
                 struct timesContainer *timesContainer = malloc(sizeof(struct timesContainer));
                 times(pid, timesContainer);
                 printf(stdout, "IO %d: start: %d, finish: %d, response time: %d\n", pid, timesContainer->start_time, timesContainer->finish_time, timesContainer->response_time);
